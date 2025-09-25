@@ -1,0 +1,32 @@
+kind: Schema
+metadata:
+  name: transaction-schema
+spec:
+  fields:
+    - field: account
+      type: string
+    - field: txn_date
+      type: date
+    - field: id
+      type: string
+    - field: amount
+      type: double
+    - field: description
+      type: string
+    - field: debit_credit
+      type: string
+    - field: mcc
+      type: string
+    - field: category
+      type: string
+    - field: merchant_group
+      type: string
+    - field: address
+      type: string
+    - field: friendly_name
+      type: string
+    - field: process_date
+      type: date
+  keys:
+    - account
+    - id

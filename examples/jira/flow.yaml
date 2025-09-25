@@ -1,0 +1,25 @@
+apiVersion: calibrant.io/v1
+kind: Flow
+metadata:
+  name: "jira"
+spec:
+  observability:
+    lineage: true
+    metrics: true
+    log: true
+    validation: true
+    datatype: true
+  security:
+    roles:
+      - "jira-stats-role"
+  tag:
+    - "jira"
+    - "scheduled"
+  contact:
+    owner: "@user1"
+    support:
+      - "@user2"
+      - "#txns"
+  schedule: "* * * 0 0"
+  tasks:
+    - name: prepare-jira-data

@@ -1,0 +1,25 @@
+kind: Task
+type: spark
+metadata:
+  name: dummy
+spec:
+  source:
+    - raw: |
+        country,capital,population
+        India,New Delhi,1_428_627_663
+        China,Beijing,1_425_671_352
+        Australia,Canberra,26_439_112
+        USA,Washington DC,339_996_564
+        Pakistan,Karachi,240_485_658
+        Nigeria,Niger,223_804_632
+        Brazil,Brasillia,216_422_446
+        Bangladesh,Dhaka,172_954_319
+        Russia,Moscow,144_444_359
+        Indonesia,Jakarta,277_534_123
+        Mexico,Mexico City,128_455_567
+
+  transform: []
+
+  sink:
+    - resourceRef: logger
+

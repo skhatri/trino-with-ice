@@ -1,0 +1,19 @@
+kind: Schema
+metadata:
+  name: merchant-schema
+spec:
+  fields:
+    - field: name
+      type: string
+    - field: merchant_group
+      type: string
+    - field: address
+      type: string
+    - field: latitude
+      type: double
+    - field: longitude
+      type: double
+    - field: friendly_name
+      type: string
+  keys:
+    - name

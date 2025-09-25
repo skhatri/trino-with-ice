@@ -1,0 +1,10 @@
+kind: "Resource"
+metadata:
+  name: "transactions-os-dataset"
+spec:
+  store:
+    format: "opensearch"
+    location: "localhost:9200"
+    options:
+      index: "transactions"
+

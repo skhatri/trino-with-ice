@@ -1,0 +1,26 @@
+kind: "Resource"
+metadata:
+  name: "london_bicycles.history"
+spec:
+  store:
+    format: "parquet"
+    location: "table"
+    options:
+      table: "iceberg"
+      dbtable: "iceberg.london_bicycles.history"
+      snapshots: 10
+
+  schema:
+    ref: london-bicycles-schema
+    merge:
+      - end_station_id
+      - end_name
+      - start_station_id
+      - start_name
+      - start_date
+      - end_date
+      - distance
+      - duration
+      - bike_id
+      - bike_model
+

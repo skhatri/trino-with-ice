@@ -1,0 +1,10 @@
+kind: "Resource"
+metadata:
+  name: "balances-output-sqlite-dataset"
+spec:
+  store:
+    format: "jdbc"
+    location: "jdbc:sqlite:/tmp/finance.db"
+    options:
+      dbtable: "balances"
+

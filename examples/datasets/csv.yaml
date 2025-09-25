@@ -1,0 +1,9 @@
+kind: "Resource"
+metadata:
+  name: "ext-transactions-csv-dataset"
+spec:
+  store:
+    format: "csv"
+    location: "${JOB_DATA_BUCKET_PREFIX}/ext-transactions/csv"
+    partition: "date=${EOD_DATE}"
+

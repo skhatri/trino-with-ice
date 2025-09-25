@@ -1,0 +1,18 @@
+kind: Task
+type: spark
+metadata:
+  name: create-monthly-balance-snapshot
+spec:
+  source:
+    - resourceRef: balances-parquet-dataset
+      name: balances
+
+  operations:
+    - type: transform
+      transform:
+        - select: account, balance_date, account_type, amount, "date_format(last_day(balance_date), 'yyyyMMdd') as dt", id
+        - group: top(balance_date) by account,dt
+        - select: account, "to_date(dt, 'yyyyMMdd') as balance_date", account_type, amount, (1 == 1) as eom, dt, id, current_date() as process_date
+        - drop: dt
+  sink:
+    - resourceRef: balances-lakehouse-dataset

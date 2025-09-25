@@ -1,0 +1,21 @@
+kind: "Resource"
+metadata:
+  name: "balances-lakehouse-dataset"
+spec:
+  store:
+    format: "parquet"
+    location: "table"
+    partition: "process_date"
+    options:
+      dbtable: "iceberg.finance.balances"
+
+  schema:
+    ref: balance-schema
+    merge:
+      - account
+      - balance_date
+      - account_type
+      - id
+      - amount
+      - eom
+

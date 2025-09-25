@@ -1,0 +1,17 @@
+kind: "Resource"
+metadata:
+  name: "category-parquet-dataset"
+spec:
+  store:
+    format: "parquet"
+    location: "table"
+    partition: "process_date"
+    options:
+      table: "iceberg"
+      snapshots: 10
+      dbtable: "iceberg.finance.category"
+
+  schema:
+    ref: category-schema
+    merge:
+      - category

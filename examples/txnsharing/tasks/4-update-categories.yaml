@@ -1,0 +1,24 @@
+kind: Task
+type: spark
+metadata:
+  name: update-categories
+spec:
+  source:
+    - name: adhoc-category
+      raw: |-
+        mcc,category
+        5812,Food and Drinks:Restaurants
+        5813,Food and Drinks:Fast Food
+        4111,Transportation:Ride Sharing
+  operations:
+    - type: transform
+      transform:
+        - select: mcc, category, current_date() as process_date
+        - filter: "mcc is not null AND category is not null"
+    - type: validation
+      checks:
+        - len(category) > 0
+  sink:
+    - resourceRef: category-parquet-dataset
+    - resourceRef: stats
+    - resourceRef: logger

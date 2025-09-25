@@ -1,0 +1,26 @@
+kind: Task
+type: spark
+metadata:
+  name: update-merchants
+spec:
+  source:
+    - name: adhoc-merchant
+      raw: |-
+        name,merchant_group,address,latitude,longitude,friendly_name
+        Coles 0766 Miranda,Coles,"Westfield, Miranda, NSW 2228",-34.03226,151.09966,Coles
+        Zara Australia Bondi Junctio,Zara,"Bondi Junction NSW, Australia",-33.89120,151.25164,Zara Australia
+        Nike Livermore 356 Livermore,Nike,"3202 Livermore Outlets Dr, Livermore, CA, United States",37.6986352,-121.8433034,Nike
+        Bunnings 346000 Kingsgrove,Bunnings Warehouse,"Richland St, Kingsgrove NSW 2208, Australia",-33.93489,151.09918,Bunnings
+
+  operations:
+    - type: transform
+      transform:
+        - select: name,merchant_group,address,latitude,longitude,friendly_name
+        - filter: "merchant_group is not null"
+        - group: "head() by name"
+    - type: validation
+      checks:
+        - len(name) > 0
+  sink:
+    - resourceRef: "merchants-parquet-dataset"
+    - resourceRef: "raw-merchants-csv-dataset"

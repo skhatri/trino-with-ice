@@ -1,0 +1,22 @@
+kind: Task
+type: spark
+metadata:
+  name: share-raw-txns-task
+spec:
+  source:
+    - resourceRef: ext-transactions-csv-dataset
+
+  operations:
+    - type: transform
+      transform:
+        - select: account_id, txn_date, transaction_id, account_type, description, amount, debit_credit, posted_date, value_date, mcc
+        - filter: debit_credit == 'CR' or debit_credit == 'DR'
+    - type: validation
+      checks:
+        - debit_credit in ('CR', 'DR')
+        - value_date is not null
+        - posted_date is not null
+
+  sink:
+    - resourceRef: raw-transactions-csv-dataset
+

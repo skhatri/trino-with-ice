@@ -1,0 +1,11 @@
+kind: "Resource"
+metadata:
+  name: "london_bicycles.cycle_stations"
+spec:
+  store:
+    format: "parquet"
+    location: "${JOB_DATA_BUCKET_PREFIX}/london_bicycles/cycle-stations"
+    options:
+      table: "iceberg"
+      snapshots: 10
+

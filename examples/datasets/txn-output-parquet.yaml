@@ -1,0 +1,9 @@
+kind: "Resource"
+metadata:
+  name: "transactions-parquet-dataset"
+spec:
+  store:
+    format: "parquet"
+    location: "${JOB_DATA_BUCKET_PREFIX}/transactions/parquet"
+    partition: "date=${EOD_DATE}"
+

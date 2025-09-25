@@ -1,0 +1,11 @@
+kind: "Resource"
+metadata:
+  name: "london_bicycles.cycle_hires"
+spec:
+  store:
+    format: "parquet"
+    location: "${JOB_DATA_BUCKET_PREFIX}/london_bicycles/cycle-hire"
+    options:
+      table: "iceberg"
+      snapshots: 10
+

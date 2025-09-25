@@ -1,0 +1,20 @@
+kind: Schema
+metadata:
+  name: balance-schema
+spec:
+  fields:
+    - field: account
+      type: string
+    - field: account_type
+      type: string
+    - field: balance_date
+      type: date
+    - field: amount
+      type: double
+    - field: id
+      type: string
+    - field: eom
+      type: boolean
+  keys:
+    - account
+    - balance_date

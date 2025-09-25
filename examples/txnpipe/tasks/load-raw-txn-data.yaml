@@ -1,0 +1,50 @@
+kind: Task
+type: spark
+metadata:
+  name: load-raw-txn-data
+spec:
+  source:
+    - resourceRef: raw-transactions-csv-dataset
+      name: txns
+
+    - resourceRef: category-parquet-dataset
+      name: category
+
+    - resourceRef: merchants-parquet-dataset
+      name: merchants
+
+
+  operations:
+    - type: join
+      expr: txns left join category
+      on:
+        - "mcc"
+
+    - type: transform
+      transform:
+        - select: transaction_id, account_id as account, txn_date, account_type, description, cast(amount as double) as amt, debit_credit, posted_date, value_date, lhs.mcc, rhs_category as category
+
+    - type: join
+      expr: curr left join merchants
+      on:
+        - "description == name"
+
+    - type: transform
+      transform:
+        - select: account, txn_date, account_type, description, amt as amount, debit_credit, posted_date, value_date, mcc, category, rhs_merchant_group as merchant_group, rhs_address as address, rhs_latitude as latitude, rhs_longitude as longitude, rhs_friendly_name as friendly_name, transaction_id as id, current_date() as process_date
+        - group: top(txn_date) by account,id
+
+    - type: validation
+      checks:
+        - account is not null
+        - txn_date is not null
+        - debit_credit in ('CR', 'DR')
+
+  sink:
+    - resourceRef: transactions-parquet-dataset
+    - resourceRef: stats
+    #- resourceRef: transactions-os-dataset
+    - resourceRef: transactions-output-sqlite-dataset
+    - resourceRef: transactions-lakehouse-dataset
+
+

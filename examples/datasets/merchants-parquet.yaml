@@ -1,0 +1,18 @@
+kind: "Resource"
+metadata:
+  name: "merchants-parquet-dataset"
+spec:
+  store:
+    format: "parquet"
+    location: "table"
+    options:
+      dbtable: "iceberg.finance.merchants"
+
+  schema:
+    ref: merchant-schema
+    merge:
+      - merchant_group
+      - address
+      - latitude
+      - longitude
+      - friendly_name

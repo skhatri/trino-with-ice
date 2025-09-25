@@ -1,0 +1,8 @@
+kind: "Resource"
+metadata:
+  name: "raw-merchants-csv-dataset"
+spec:
+  store:
+    format: "csv"
+    location: "${JOB_DATA_BUCKET_PREFIX}/raw/merchants/csv"
+    partition: "date=${EOD_DATE}"

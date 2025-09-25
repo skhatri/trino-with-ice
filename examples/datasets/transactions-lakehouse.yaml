@@ -1,0 +1,26 @@
+kind: "Resource"
+metadata:
+  name: "transactions-lakehouse-dataset"
+spec:
+  store:
+    format: "parquet"
+    location: "table"
+    partition: "process_date"
+    options:
+      dbtable: "iceberg.finance.transactions"
+
+  schema:
+    ref: transaction-schema
+    merge:
+      - account
+      - txn_date
+      - amount
+      - description
+      - merchant_group
+      - address
+      - friendly_name
+      - category
+      - mcc
+      - debit_credit
+
+

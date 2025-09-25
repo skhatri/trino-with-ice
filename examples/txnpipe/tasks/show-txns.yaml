@@ -1,0 +1,26 @@
+kind: Task
+type: spark
+metadata:
+  name: load-raw-txn-data
+spec:
+  source:
+    - resourceRef: transactions-lakehouse-dataset
+      name: txns
+
+  operations:
+
+    - type: transform
+      transform:
+        - select: txn_date, account_type, description, amount, debit_credit, posted_date, value_date, mcc, category
+        - filter: mcc == '4111'
+    - type: validation
+      checks:
+        - account is not null
+        - txn_date is not null
+        - debit_credit in ('CR', 'DR')
+
+  sink:
+    - resourceRef: logger
+
+
+

@@ -1,0 +1,21 @@
+kind: Task
+type: spark
+metadata:
+  name: rocket-launches
+spec:
+  source:
+    - resourceRef: spacex-launches-dataset
+  options:
+    showSample: false
+    printSummary: true
+    failOnValidationError: false
+    autoIcebergSchema: true
+
+  operations:
+    - type: transform
+      transform:
+        - select: |
+            flight_number, mission_name, "rocket.rocket_id as rocket_id", "rocket.rocket_name as rocket_name", "rocket.rocket_type as rocket_type", "launch_date_utc as launch_date", "rocket.fairings.reused as fairings_reused"
+
+  sink:
+    - resourceRef: raw-spacex-parquet-dataset

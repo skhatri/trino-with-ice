@@ -1,0 +1,9 @@
+kind: "Resource"
+metadata:
+  name: "ext-transactions-jsonl-dataset"
+spec:
+  store:
+    format: "json"
+    location: "${JOB_DATA_BUCKET_PREFIX}/ext-transactions/jsonl"
+    partition: "date=${EOD_DATE}"
+

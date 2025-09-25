@@ -1,0 +1,25 @@
+kind: Task
+type: spark
+metadata:
+  name: prepare-jira
+spec:
+  source:
+    - resourceRef: "jira-jsonl-dataset"
+  options:
+    showSample: true
+    printSummary: true
+    failOnValidationError: false
+    debug: true
+
+  operations:
+    - type: transform
+      transform:
+        - select: id, key, "fields.summary", "fields.created", "fields.updated", "fields.status.name" as status, "fields.issuetype.name" as issueType, "concat_ws(' ',listMap(fields.components)) as components", fields.labels as labels
+        - filter: "key is not null"
+        - filter: "issueType != 'Bug'"
+        - filter: "issueType != 'Improvement'"
+        - limit: "10"
+
+  sink:
+
+    - resourceRef: logger

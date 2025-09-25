@@ -1,0 +1,9 @@
+kind: "Resource"
+metadata:
+  name: "jira-jsonl-dataset"
+spec:
+  store:
+    format: "json"
+    location: "${JOB_DATA_BUCKET_PREFIX}/jira/jsonl"
+    partition: "date=2024-10-26"
+

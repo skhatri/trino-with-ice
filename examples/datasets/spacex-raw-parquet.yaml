@@ -1,0 +1,16 @@
+kind: "Resource"
+metadata:
+  name: "raw-spacex-parquet-dataset"
+spec:
+  store:
+    format: "parquet"
+    location: "table"
+    partition: "launch_date"
+    options:
+      table: "iceberg"
+      snapshots: 10
+      dbtable: "iceberg.spacex.launches"
+  schema:
+    ref: launch-schema
+    merge:
+      - flight_number

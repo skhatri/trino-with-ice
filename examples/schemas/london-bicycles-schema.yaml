@@ -1,0 +1,29 @@
+kind: Schema
+metadata:
+  name: london-bicycles-schema
+spec:
+  fields:
+    - field: bike_id
+      type: string
+    - field: bike_model
+      type: string
+    - field: rental_id
+      type: string
+    - field: duration
+      type: double
+    - field: start_station_id
+      type: string
+    - field: start_name
+      type: string
+    - field: end_station_id
+      type: string
+    - field: end_name
+      type: string
+    - field: start_date
+      type: date
+    - field: end_date
+      type: date
+    - field: distance
+      type: double
+  keys:
+    - rental_id

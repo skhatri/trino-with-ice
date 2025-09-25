@@ -1,0 +1,26 @@
+kind: Task
+type: spark
+metadata:
+  name: prepare-categories
+spec:
+  source:
+    - resourceRef: "ext-transactions-csv-dataset"
+  options:
+    showSample: true
+    printSummary: true
+    failOnValidationError: false
+    debug: true
+
+  operations:
+    - type: transform
+      transform:
+        - select: mcc, "nvl(category,'') as category", current_date() as process_date
+        - filter: "mcc is not null"
+        - group: "head(category) by mcc"
+    - type: validation
+      checks:
+        - len(category) > 0
+  sink:
+    - resourceRef: category-parquet-dataset
+    - resourceRef: stats
+    - resourceRef: logger

@@ -1,0 +1,5 @@
+kind: Task
+type: Spark
+metadata:
+  name: transform-txn-basic
+spec: {}

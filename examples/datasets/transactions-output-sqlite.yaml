@@ -1,0 +1,10 @@
+kind: "Resource"
+metadata:
+  name: "transactions-output-sqlite-dataset"
+spec:
+  store:
+    format: "jdbc"
+    location: "jdbc:sqlite:/tmp/finance.db"
+    options:
+      dbtable: "transactions"
+

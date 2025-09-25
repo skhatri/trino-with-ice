@@ -1,0 +1,52 @@
+kind: Task
+type: spark
+metadata:
+  name: cycle-stations-summary
+spec:
+  source:
+    - resourceRef: london_bicycles.cycle_stations
+      name: stations
+
+    - resourceRef: london_bicycles.cycle_hires
+      name: hires
+
+  operations:
+    # id,installed,latitude,locked,longitude,name,bikes_count,docks_count,nbEmptyDocks,temporary,terminal_name,install_date,removal_date,
+    # rental_id,duration,duration_ms,bike_id,bike_model,end_date,end_station_id,end_station_name,start_date,start_station_id,start_station_name,end_station_logical_terminal,start_station_logical_terminal,end_station_priority_id,
+    - type: transform
+      target: stations
+      transform:
+        - select: id, latitude, longitude, name
+
+    - type: transform
+      target: hires
+      transform:
+        - select: rental_id, duration, start_station_id, end_station_id, bike_model, bike_id, start_date, end_date
+
+    - type: join
+      expr: curr broadcast join hires
+      on:
+        - "id == start_station_id"
+
+    - type: transform
+      transform:
+        - select: id, latitude, longitude, name, rhs_rental_id as rental_id, rhs_duration as duration, rhs_start_station_id as start_station_id, rhs_end_station_id as end_station_id, rhs_bike_model as bike_model, rhs_bike_id as bike_id, rhs_start_date as start_date, rhs_end_date as end_date
+
+    - type: join
+      expr: stations broadcast join curr
+      on:
+        - "id == end_station_id"
+
+    - type: transform
+      transform:
+        - select: rhs_rental_id as rental_id, rhs_duration as duration, rhs_start_station_id as start_station_id, rhs_latitude as start_latitude, rhs_longitude as start_longitude, rhs_name as start_name, rhs_end_station_id as end_station_id, latitude as end_latitude, longitude as end_longitude, name as end_name, rhs_bike_model as bike_model, rhs_bike_id as bike_id, rhs_start_date as start_date, rhs_end_date as end_date
+        - select: bike_id, bike_model, rental_id, duration, start_station_id, start_name, end_station_id, end_name, start_date, end_date, "geodist(start_latitude, start_longitude, end_latitude, end_longitude) as distance"
+        - sort: rental_id
+
+  sink:
+    - resourceRef: london_bicycles.history
+
+# 10 longest ride
+# popular bike rides
+# Can we identify bike stations with consistently high or low utilization rates?
+

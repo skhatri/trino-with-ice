@@ -1,0 +1,13 @@
+kind: Task
+type: spark
+metadata:
+  name: rocket-launch-transform
+spec:
+  source:
+    - resourceRef: raw-spacex-parquet-dataset
+  operations:
+    - type: transform
+      transform:
+        - select: flight_number, mission_name, rocket_id, rocket_type, rocket_name, launch_date, fairings_reused
+  sink:
+    - resourceRef: logger

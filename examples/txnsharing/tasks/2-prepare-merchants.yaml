@@ -1,0 +1,24 @@
+kind: Task
+type: spark
+metadata:
+  name: prepare-merchants
+spec:
+  source:
+    - resourceRef: "ext-transactions-csv-dataset"
+  options:
+    showSample: true
+    printSummary: true
+    failOnValidationError: false
+  operations:
+    - type: transform
+      transform:
+        - select: description as name, m_group as merchant_group, address,latitude,longitude,friendly_name
+        - filter: merchant_group is not null
+        - group: head() by name
+    - type: validation
+      checks:
+        - len(name) > 0
+        - len(merchant_group) > 0
+  sink:
+    - resourceRef: raw-merchants-csv-dataset
+    - resourceRef: "merchants-parquet-dataset"

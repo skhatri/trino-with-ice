@@ -1,0 +1,9 @@
+kind: "Resource"
+metadata:
+  name: "raw-transactions-csv-dataset"
+spec:
+  store:
+    format: "csv"
+    location: "${JOB_DATA_BUCKET_PREFIX}/raw/transactions/csv"
+    partition: "date=${EOD_DATE}"
+

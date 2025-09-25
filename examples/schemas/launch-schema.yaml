@@ -1,0 +1,17 @@
+kind: Schema
+metadata:
+  name: launch-schema
+spec:
+  fields:
+    - field: flight_number
+      type: integer
+    - field: rocket_id
+      type: integer
+    - field: rocket_type
+    - field: rocket_name
+    - field: launch_date
+      type: date
+    - field: fairings_reused
+      type: boolean
+  keys:
+    - flight_number

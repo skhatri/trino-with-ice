@@ -1,0 +1,11 @@
+kind: "Resource"
+metadata:
+  name: "spacex-launches-dataset"
+spec:
+  store:
+    format: "http"
+    location: "https://api.spacexdata.com/v3/launches"
+    options:
+      method: "GET"
+      timeout: 30000
+      retries: 3

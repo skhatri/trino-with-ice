@@ -1,0 +1,29 @@
+apiVersion: calibrant.io/v1
+kind: Flow
+metadata:
+  name: "txnpipe"
+spec:
+  observability:
+    lineage: true
+    metrics: true
+    log: true
+    validation: true
+    datatype: true
+  security:
+    roles:
+      - "txn-write-role"
+  tag:
+    - "txn"
+    - "scheduled"
+  contact:
+    owner: "@user1"
+    support:
+      - "@user2"
+      - "#txns"
+  schedule: "* * * 0 0"
+  tasks:
+    - name: load-raw-txn-data
+      next: transform-txn-basic
+    - name: transform-txn-basic
+      next: broadcast-txn-basic
+    - name: broadcast-txn-basic

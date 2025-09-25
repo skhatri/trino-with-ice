@@ -1,0 +1,30 @@
+apiVersion: calibrant.io/v1
+kind: Flow
+metadata:
+  name: "txnsharing"
+spec:
+  observability:
+    lineage: true
+    metrics: true
+    log: true
+    validation: true
+    datatype: true
+  security:
+    roles:
+      - "txn-write-role"
+  tag:
+    - "txn"
+    - "scheduled"
+  contact:
+    owner: "@user1"
+    support:
+      - "@user2"
+      - "#txns"
+  schedule: "* * * 0 0"
+  tasks:
+    - name: prepare-categories
+      next: prepare-merchants
+    - name: prepare-merchants
+      next: share-raw-txns
+    - name: share-raw-txns
+

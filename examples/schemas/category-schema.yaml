@@ -1,0 +1,13 @@
+kind: Schema
+metadata:
+  name: category-schema
+spec:
+  fields:
+    - field: mcc
+      type: string
+    - field: category
+      type: string
+    - field: process_date
+      type: date
+  keys:
+    - mcc

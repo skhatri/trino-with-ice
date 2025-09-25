@@ -1,0 +1,27 @@
+kind: Task
+type: spark
+metadata:
+  name: load-balances-data
+spec:
+  source:
+    - resourceRef: transactions-parquet-dataset
+      name: balances
+
+  operations:
+
+    - type: transform
+      transform:
+        - select: account, txn_date as balance_date, account_type, "base64(concat(account, '-', txn_date, '-', account_type)) as id", amount,  "if(last_day(txn_date) == txn_date, true, false)" as eom, "date_format(txn_date, 'yyyyMMdd') as dt", current_date() as process_date
+        - group: top(balance_date) by account,dt
+        - drop: dt
+
+    - type: validation
+      checks:
+        - account is not null
+        - account_type is not null
+        - amount is not null
+
+  sink:
+    - resourceRef: balances-parquet-dataset
+    - resourceRef: balances-output-sqlite-dataset
+    - resourceRef: balances-lakehouse-dataset

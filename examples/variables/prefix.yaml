@@ -1,0 +1,8 @@
+kind: "Variables"
+metadata:
+  name: "fs-paths"
+spec:
+  - name: "EOD_DATE"
+    value: "${EOD_DATE}"
+  - name: "JOB_DATA_BUCKET_PREFIX"
+    value: "s3a://finance"

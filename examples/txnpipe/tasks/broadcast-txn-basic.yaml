@@ -1,0 +1,6 @@
+#SparkTask, FlinkTask, ContainerTask
+kind: Task
+type: spark
+metadata:
+  name: broadcast-txn-basic
+spec: {}
