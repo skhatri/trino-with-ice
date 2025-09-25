@@ -1,0 +1,390 @@
+volumes:
+  coordinatordb: {}
+networks:
+  catalogn: { }
+
+services:
+  postgres:
+    image: postgres:16.3
+    profiles:
+      - db
+      - all
+
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./containers/postgres/data:/var/lib/postgresql/data
+      - ./containers/postgres/certs:/opt/postgres/certs:r
+      - ./containers/postgres/scripts/:/docker-entrypoint-initdb.d/
+      - ./containers/postgres/conf:/var/lib/postgresql/conf
+    container_name: postgres
+    command: postgres -c config_file=/var/lib/postgresql/conf/postgresql.conf -c ssl=on
+    networks:
+      catalogn:
+        aliases:
+        - postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: "10s"
+      timeout: "10s"
+      retries: 3
+
+  pg-data:
+    profiles:
+      - db
+      - all
+    image: postgres:16.3
+    environment:
+      - PG_USER=postgres
+      - PGPASSWORD=password
+      - PG_HOST=postgres
+    container_name: pg-data
+    volumes:
+      - ./containers/pg-data/files/scripts:/tmp/scripts
+      - ./containers/pg-data/files/sql:/tmp/data
+    networks:
+      catalogn:
+        aliases:
+          - pg-data
+    command:
+      - /bin/bash
+      - -c
+      - /tmp/scripts/init.sh
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  iceberg-rest:
+    profiles:
+      - query
+      - app
+      - all
+    image: tabulario/iceberg-rest:latest
+    environment:
+      - CATALOG_CATALOG__IMPL=org.apache.iceberg.jdbc.JdbcCatalog
+
+      - CATALOG_WAREHOUSE=s3://warehouse
+      - CATALOG_IO__IMPL=org.apache.iceberg.aws.s3.S3FileIO
+      - CATALOG_S3_ENDPOINT=http://minio:9000
+      - CATALOG_S3_REGION=us-east-1
+      - CATALOG_S3_SSL_ENABLED=false
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=minioadmin
+      - AWS_SECRET_ACCESS_KEY=minioadmin
+
+      - CATALOG_S3_PATH-STYLE-ACCESS=true
+
+      - CATALOG_URI=jdbc:postgresql://postgres:5432/lakehouse
+      - CATALOG_jdbc.useSSL=true
+      - CATALOG_JDBC_USER=lakehouse_user
+      - CATALOG_JDBC_PASSWORD=password
+    container_name: iceberg-rest
+    networks:
+      catalogn:
+        aliases:
+          - iceberg-rest
+    ports:
+      - "8181:8181"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-client:
+        condition: service_completed_successfully
+    restart: on-failure
+
+  coordinator:
+    profiles:
+      - query
+      - all
+    image: trinodb/trino:476
+    container_name: coordinator
+    environment: []
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    expose:
+      - "8080"
+      - "8443"
+    volumes:
+      - ./containers/trino/certs:/opt/trino/certs
+      - ./containers/trino/security:/opt/trino/security
+      - ./containers/trino/coordinator:/etc/trino
+      - coordinatordb:/data/trino
+    networks:
+      catalogn:
+        aliases:
+          - coordinator
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sS http://localhost:8080/|| exit 1"]
+      interval: "20s"
+      timeout: "20s"
+      retries: 3
+
+
+  minio:
+    profiles:
+      - store
+      - query
+      - all
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    volumes:
+      - ./containers/minio/store:/data
+    command: server /data --console-address ":9001"
+    networks:
+      catalogn:
+        aliases:
+          - minio
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  minio-client:
+    profiles:
+      - query
+      - store
+      - all
+    image: minio/mc:latest
+    container_name: minio-client
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    networks:
+      - catalogn
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set minio http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb minio/warehouse || true;
+      /usr/bin/mc mb minio/finance || true;
+      /usr/bin/mc mb minio/spacex || true;
+      exit 0;
+      "
+
+  jobmanager:
+    profiles:
+      - stream
+      - all
+    image: ${FLINK_DOCKER_IMAGE_NAME:-flink:2.0-java17}
+    container_name: jobmanager
+    expose:
+      - "6123"
+    ports:
+      - "8081:8081"
+    command: jobmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+      - FLINK_PROPERTIES="jobmanager.rpc.address:jobmanager"
+    networks:
+      catalogn:
+        aliases:
+          - jobmanager
+
+  taskmanager:
+    profiles:
+      - stream
+      - all
+    image: ${FLINK_DOCKER_IMAGE_NAME:-flink:2.0-java17}
+    container_name: taskmanager
+    expose:
+      - "6121"
+      - "6122"
+    depends_on:
+      - jobmanager
+    command: taskmanager
+    links:
+      - "jobmanager:jobmanager"
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+      - FLINK_PROPERTIES=jobmanager.rpc.address:jobmanager
+    networks:
+      catalogn:
+        aliases:
+          - taskmanager
+
+  kafka-ui:
+    profiles:
+      - stream
+      - all
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - 8080:8080
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'true'
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_METRICS_PORT: 9997
+    volumes: []
+    networks:
+      catalogn:
+        aliases:
+          - kafka-ui
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  kafka:
+    profiles:
+      - stream
+      - all
+    image: bitnami/kafka:3.4.1-debian-11-r117
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+      - "9997:9997"
+    volumes:
+      - "./containers/kafka/data:/bitnami"
+    environment:
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@localhost:9093
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    container_name: kafka
+    networks:
+      catalogn:
+        aliases:
+          - kafka
+    healthcheck:
+      test: ["CMD-SHELL", "bash", "-c", "kafka-topics.sh", "--list", "--bootstrap.server", "localhost:9092"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  kafka-setup:
+    profiles:
+      - stream
+      - all
+    image: bitnami/kafka:3.4.1-debian-11-r117
+    environment:
+      - TOPICS=transactions.events,matches,txns.top
+      - KAFKA_HOST=kafka
+      - RECREATE_TOPIC=true
+    container_name: kafka-setup
+    volumes:
+      - './containers/kafka-setup/files/scripts:/tmp/scripts'
+    command: ['/bin/bash', '-c', '/tmp/scripts/init.sh']
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      catalogn:
+        aliases:
+          - kafka-setup
+
+
+  solace:
+    profiles:
+      - stream
+      - all
+    image: solace/solace-pubsub-standard:10.8
+    shm_size: 1g
+    environment:
+      - username_admin_globalaccesslevel=admin
+      - username_admin_password=password
+      - system_scaling_maxconnectioncount=100
+    expose:
+      - "8080"
+      - "55555"
+      - "8008"
+    volumes:
+      - ./containers/solace/data:/var/lib/solace/data
+    ulimits:
+      nofile:
+        soft: 2448
+        hard: 6592
+    ports:
+      - "9040:8080"
+      - "8008:8008"
+      - "55554:55555"
+    container_name: solace
+    networks:
+      catalogn:
+        aliases:
+          - solace
+    healthcheck:
+      test: ["CMD-SHELL", "curl -u admin:password -f http://localhost:8080/SEMP/v2/config/about"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  solace-setup:
+    profiles:
+      - stream
+      - all
+    image: skhatri/curl:8.7.1
+    environment: []
+    expose: []
+    volumes:
+      - ./containers/solace-setup:/tmp/scripts
+    container_name: solace-setup
+    command:
+      - /bin/sh
+      - -c
+      - /tmp/scripts/create.queue.sh
+    depends_on:
+      solace:
+        condition: service_healthy
+    networks:
+      catalogn:
+        aliases:
+          - solace-setup
+
+
+  datapipe:
+    profiles:
+      - app
+      - all
+    image: skhatri/datapipe:latest
+    container_name: datapipe
+    environment:
+      - BASE_PATH=/opt/app/conf
+      - S3_ENDPOINT=http://minio:9000
+      - S3_ACCESS_KEY=minioadmin
+      - S3_SECRET_KEY=minioadmin
+      - AWS_REGION=us-east-1
+      - ICEBERG_REST_URI=http://iceberg-rest:8181
+      - POSTGRES_URL=jdbc:postgresql://postgres:5432/postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - TASK_PATH=${TASK_PATH}
+      - CATALOG_URI=jdbc:postgresql://postgres:5432/lakehouse
+      - CATALOG_URL=http://iceberg-rest:8181
+    ports:
+      - "8090:8090"
+    volumes:
+      - "./examples:/opt/app/conf"
+    networks:
+      - catalogn
+    depends_on:
+      iceberg-rest:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    restart: no
+
