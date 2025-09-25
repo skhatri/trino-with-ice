@@ -1,0 +1,8 @@
+description,friendly_name,account_id,amount,transaction_id,m_group,account_type,debit_credit,posted_date,value_date,txn_date,mcc,category,notes,address,latitude,longitude,tags
+PLINE PH HURSTVILLE HURSTVILLE,Priceline Pharmacy Westfield Hurstville,c1,57.11,t1,Priceline Pharmacy,credit_card,DR,2025-09-21,2025-09-19,2021-10-19,5912,Medical,"","225 Forest Rd, Hurstville NSW 2220, Australia",-33.9583,151.0995,[]
+ENERGYAUSTRALIA PTY LT MELBOURNE,Energy Australia,c2,230.34,t2,Energy Australia,credit_card,DR,2025-09-20,2025-09-19,2025-09-19,4900,"Utilities","","",0.0,0.0,[]
+PAYPAL *AUSFORUNHCR 35871921,Australia For UNHCR,c1,200.00,t3,Australia For UNHCR,credit_card,DR,2025-09-18,2025-09-17,2025-09-17,8398,Charities,"","",0.0,0.0,[]
+PAYPAL *GOODIECO 35871921,Paypal *goodieco 35871921,c1,239.00,t4,"",credit_card,DR,2025-09-18,2025-09-17,2025-09-17,5977,Beauty,"","",-1.0,-1.0,[]
+PLINE PH HURSTVILLE HURSTVILLE,Priceline Pharmacy Westfield Hurstville,c2,13.95,t5,Priceline Pharmacy,credit_card,DR,2025-09-19,2025-09-17,2025-09-17,5912,Medical,"","225 Forest Rd, Hurstville NSW 2220, Australia",-33.9583,151.0995,[]
+STATION MEATS AT WESTF HURSTVILLE,Station Meats Hurstville,c2,20.35,t6,Station Meats,credit_card,DR,2025-09-18,2025-09-17,2025-09-17,5422,Groceries,"","Park Rd & Cross St, Hurstville NSW 2220, Australia",-33.96616,151.10519,[]
+COLES 0782 HURSTVILLE,Coles Hurstville,c2,99.38,t7,Coles,credit_card,DR,2025-09-18,2025-09-17,2022-09-17,5411,Groceries,"","Park Road, Hurstville NSW 2220, Australia",-33.966,151.10539,[]
