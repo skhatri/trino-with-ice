@@ -16,12 +16,12 @@ mkdir -p dataset/london_bicycles/cycle-hire
 mkdir -p dataset/london_bicycles/cycle-stations
 
 echo -e "${BLUE}Downloading London bicycles cycle-hire data...${NC}"
-if [[ ! -f dataset/london_bicycles/cycle-hire/000000000001.parquet ]]; then
-  curl -L -o dataset/london_bicycles/cycle-hire/000000000001.parquet https://github.com/skhatri/app-data/raw/main/london_bicycles/cycle-hire/000000000001.parquet
-fi;
-if [[ ! -f dataset/london_bicycles/cycle-hire/000000000002.parquet ]]; then
-  curl -L -o dataset/london_bicycles/cycle-hire/000000000002.parquet https://github.com/skhatri/app-data/raw/main/london_bicycles/cycle-hire/000000000002.parquet
-fi;
+for i in {1..5};
+do
+        if [[ ! -f dataset/london_bicycles/cycle-hire/00000000000${i}.parquet ]]; then
+          curl -L -o dataset/london_bicycles/cycle-hire/00000000000${i}.parquet https://github.com/skhatri/app-data/raw/main/london_bicycles/cycle-hire/00000000000${i}.parquet
+        fi;
+done;
 
 echo -e "${BLUE}Downloading London bicycles cycle-stations data...${NC}"
 if [[ ! -f dataset/london_bicycles/cycle-stations/000000000000.parquet ]]; then
