@@ -113,7 +113,7 @@ pyiceberg:
 		pip install pyiceberg; \
 	fi
 
-setup-data: store pyiceberg
+setup-data: store db pyiceberg
 	@echo "$(BLUE)Setting up sample data...$(NC)"
 	./setup-data.sh
 

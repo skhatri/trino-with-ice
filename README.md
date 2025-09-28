@@ -6,7 +6,6 @@ DataPipe Docker Compose setup with Trino, Iceberg, and MinIO for streaming data 
 
 ### 1. Setup Environment
 ```bash
-make store
 make setup-data
 ```
 Starts storage services and loads sample data into MinIO.
