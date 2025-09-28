@@ -45,10 +45,11 @@ make clean-all
 Stops all services and removes all persistent data (PostgreSQL, MinIO, Kafka, Solace).
 
 ## Available Services
-- **Trino**: http://localhost:8080 (query engine)
+- **Trino**: http://localhost:7080 (query engine)
 - **MinIO**: http://localhost:9001 (S3-compatible storage, admin/admin)
 - **Flink**: http://localhost:8081 (stream processing)
-- **Kafka UI**: http://localhost:8080 (message streaming)
+- **Kafka UI**: http://localhost:7085 (message streaming)
+- **Iceberg Catalog**: http://localhost:8181 (table catalog)
 
 ## Explore other commands
 ```bash

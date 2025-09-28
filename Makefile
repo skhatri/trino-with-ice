@@ -1,4 +1,4 @@
-.PHONY: help all db query store stream app up down logs clean clean-all setup-data examples list-examples run-task build
+.PHONY: help all db query store stream app up down logs clean clean-all setup-data pyiceberg examples list-examples run-task build
 
 TASK_PATH ?= $(shell grep '^TASK_PATH=' .env 2>/dev/null | cut -d'=' -f2)
 
@@ -103,7 +103,15 @@ build:
 	@echo "$(BLUE)Building datapipe image...$(NC)"
 	docker build --no-cache -t datapipe:latest .
 
-setup-data: store
+pyiceberg:
+	@if [[ ! -d ~/.venv/pyiceberg ]]; then python3 -m venv ~/.venv/pyiceberg; fi; \
+	source ~/.venv/pyiceberg/bin/activate && \
+	if ! python -c "import pyiceberg" 2>/dev/null; then \
+		echo "$(YELLOW)Installing pyiceberg...$(NC)"; \
+		pip install pyiceberg; \
+	fi
+
+setup-data: store pyiceberg
 	@echo "$(BLUE)Setting up sample data...$(NC)"
 	./setup-data.sh
 
@@ -223,24 +231,21 @@ dev-all:
 	@echo "  DataPipe:  http://localhost:8090"
 	@echo "  Solace:    http://localhost:9040"
 
-catalog-list:
-	@echo "$(BLUE)Listing all namespaces and tables...$(NC)"
-	pyiceberg --uri http://localhost:8181 list
+catalog-list: pyiceberg
+	@source ~/.venv/pyiceberg/bin/activate && pyiceberg --uri http://localhost:8181 list
 
-catalog-list-%:
-	@echo "$(BLUE)Listing tables in namespace: $*$(NC)"
-	pyiceberg --uri http://localhost:8181 list $*
+catalog-list-%: pyiceberg
+	@source ~/.venv/pyiceberg/bin/activate && pyiceberg --uri http://localhost:8181 list $*
 
-catalog-describe:
+catalog-describe: pyiceberg
 	@if [ -z "$(TABLE)" ]; then \
 		echo "$(RED)Error: TABLE is required$(NC)"; \
 		echo "Usage: make catalog-describe TABLE=namespace.table"; \
 		exit 1; \
 	fi
-	@echo "$(BLUE)Describing table: $(TABLE)$(NC)"
-	pyiceberg --uri http://localhost:8181 describe $(TABLE)
+	@source ~/.venv/pyiceberg/bin/activate && pyiceberg --uri http://localhost:8181 describe $(TABLE)
 
-catalog-drop:
+catalog-drop: pyiceberg
 	@if [ -z "$(TABLE)" ]; then \
 		echo "$(RED)Error: TABLE is required$(NC)"; \
 		echo "Usage: make catalog-drop TABLE=namespace.table"; \
@@ -248,7 +253,7 @@ catalog-drop:
 	fi
 	@echo "$(RED)Dropping table: $(TABLE)$(NC)"
 	@read -p "Are you sure you want to drop $(TABLE)? [y/N]: " confirm && [ "$$confirm" = "y" ]
-	pyiceberg --uri http://localhost:8181 drop table $(TABLE)
+	@name=pyiceberg; source ~/.venv/$$name/bin/activate && pyiceberg --uri http://localhost:8181 drop table $(TABLE)
 
 s3:
 	@if [ -z "$(filter-out $@,$(MAKECMDGOALS))" ]; then \
