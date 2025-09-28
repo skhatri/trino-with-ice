@@ -31,14 +31,16 @@ help:
 	@echo "  make run-task TASK_PATH=bicycles/flow.yaml # Run single task"
 	@echo "  make examples                              # List all example files"
 
-all:
+all: local-perm
 	@echo "$(BLUE)Starting all services...$(NC)"
 	docker-compose --profile all up -d
 
-db:
+db: local-perm
 	@echo "$(BLUE)Starting database services...$(NC)"
 	docker-compose --profile db up -d
 
+local-perm:
+	@chmod 600 containers/postgres/certs/server.key 2>/dev/null || true
 query:
 	@echo "$(BLUE)Starting query services...$(NC)"
 	docker-compose --profile query up -d
@@ -51,7 +53,7 @@ stream:
 	@echo "$(BLUE)Starting streaming services...$(NC)"
 	docker-compose --profile stream up -d
 
-app:
+app: local-perm
 	@echo "$(BLUE)Starting application services...$(NC)"
 	@if [ -z "$(TASK_PATH)" ]; then \
 		echo "$(RED)Warning: TASK_PATH not set. Using default from .env$(NC)"; \
