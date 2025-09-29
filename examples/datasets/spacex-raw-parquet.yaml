@@ -13,4 +13,7 @@ spec:
   schema:
     ref: launch-schema
     merge:
-      - flight_number
+      - rocket_type
+      - rocket_name
+      - launch_date
+      - fairings_reused

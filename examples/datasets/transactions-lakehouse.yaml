@@ -12,7 +12,6 @@ spec:
   schema:
     ref: transaction-schema
     merge:
-      - account
       - txn_date
       - amount
       - description
