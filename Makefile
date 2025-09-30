@@ -228,14 +228,20 @@ list-examples: examples
 15-show-jira-parquet: 15
 
 16:
-	@$(MAKE) run-task TASK_PATH=jdbc/tasks/16-load-iceberg-tables.yaml
+	@$(MAKE) run-task TASK_PATH=jira/tasks/16-jira-empty-data.yaml
 
-16-load-iceberg-tables: 16
+16-jira-empty-data: 16
+
 
 17:
-	@$(MAKE) run-task TASK_PATH=jdbc/tasks/17-show-iceberg-table-info.yaml
+	@$(MAKE) run-task TASK_PATH=jdbc/tasks/17-load-iceberg-tables.yaml
 
-17-show-iceberg-table-info: 17
+17-load-iceberg-tables: 17
+
+18:
+	@$(MAKE) run-task TASK_PATH=jdbc/tasks/18-show-iceberg-table-info.yaml
+
+18-show-iceberg-table-info: 18
 
 
 
