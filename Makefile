@@ -222,6 +222,23 @@ list-examples: examples
 
 14-fetch-jira-data: 14
 
+15:
+	@$(MAKE) run-task TASK_PATH=jira/tasks/15-show-jira-parquet.yaml
+
+15-show-jira-parquet: 15
+
+16:
+	@$(MAKE) run-task TASK_PATH=jdbc/tasks/16-load-iceberg-tables.yaml
+
+16-load-iceberg-tables: 16
+
+17:
+	@$(MAKE) run-task TASK_PATH=jdbc/tasks/17-show-iceberg-table-info.yaml
+
+17-show-iceberg-table-info: 17
+
+
+
 dev-db:
 	@$(MAKE) db
 
