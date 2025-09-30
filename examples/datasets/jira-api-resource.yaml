@@ -14,6 +14,24 @@ spec:
       logResponse: true
       headers:
         Content-Type: "application/json"
+      pagination:
+        enabled: true
+        type: "cursor"
+
+        cursor:
+          responseField: "nextPageToken"
+          requestParam: "nextPageToken"
+          paramLocation: "query"
+
+        stopConditions:
+          - field: "nextPageToken"
+            condition: "null_or_empty"
+          - field: "isLast"
+            condition: "true"
+
+        maxPages: 10
+        maxRecords: 1000
+
       body: |
         {
           "jql": "project = AB",
