@@ -14,7 +14,7 @@ spec:
     ref: jira-issue-schema
     merge:
       - summary
-      - status_category_name
-      - assignee_display_name
-      - issue_type_name
+      - status
+      - assignee
+      - issue_type
       - project_key

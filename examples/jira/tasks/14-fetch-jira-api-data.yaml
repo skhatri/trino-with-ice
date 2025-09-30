@@ -27,4 +27,4 @@ spec:
         - filter: "key is not null"
 
   sink:
-    - resourceRef: logger
+    - resourceRef: raw-jira-parquet-dataset
