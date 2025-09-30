@@ -358,6 +358,24 @@ services:
           - solace-setup
 
 
+  wiremock:
+    profiles:
+      - mock
+      - store
+      - all
+    image: wiremock/wiremock:3.5.4
+    container_name: wiremock
+    ports:
+      - "8088:8080"
+    volumes:
+      - "./containers/wiremock/mappings:/home/wiremock/mappings"
+      - "./containers/mock:/home/wiremock/__files"
+    networks:
+      catalogn:
+        aliases:
+          - wiremock
+    command: ["--global-response-templating", "--verbose"]
+
   datapipe:
     profiles:
       - app

@@ -1,0 +1,48 @@
+{
+  "issues": [
+    {
+      "key": "AB-12",
+      "fields": {
+        "summary": "Ticket 1",
+        "created": "2025-09-30T23:10:01.320+0000",
+        "statusCategory": {
+          "name": "To do"
+        },
+        "labels": ["mvp", "data"],
+        "assignee": {
+          "displayName": "Ben"
+        },
+        "issuetype": {
+          "name": "Sub-task"
+        },
+        "project": {
+          "key": "AB"
+        },
+        "updated": "2025-09-30T23:10:01.320+0000"
+      }
+    },
+    {
+      "key": "AB-13",
+      "fields": {
+        "summary": "Ticket 2",
+        "created": "2025-09-30T23:11:01.320+0000",
+        "statusCategory": {
+          "name": "To do"
+        },
+        "labels": ["mvp", "data"],
+        "assignee": {
+          "displayName": "Margaret"
+        },
+        "issuetype": {
+          "name": "Sub-task"
+        },
+        "project": {
+          "key": "AB"
+        },
+        "updated": "2025-09-30T23:11:01.320+0000"
+      }
+    }
+  ],
+  "nextPageToken": "there-is-one-more",
+  "isLast": false
+}

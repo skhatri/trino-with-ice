@@ -1,0 +1,19 @@
+kind: Schema
+metadata:
+  name: jira-issue-schema
+spec:
+  fields:
+    - field: key
+    - field: summary
+    - field: created
+      type: timestamp
+    - field: updated
+      type: timestamp
+    - field: status
+    - field: labels
+      type: array
+    - field: assignee
+    - field: issue_type
+    - field: project_key
+  keys:
+    - key

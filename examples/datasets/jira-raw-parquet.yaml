@@ -1,0 +1,20 @@
+kind: "Resource"
+metadata:
+  name: "raw-jira-parquet-dataset"
+spec:
+  store:
+    format: "parquet"
+    location: "table"
+    partition: "created"
+    options:
+      table: "iceberg"
+      snapshots: 10
+      dbtable: "iceberg.jira.issues"
+  schema:
+    ref: jira-issue-schema
+    merge:
+      - summary
+      - status_category_name
+      - assignee_display_name
+      - issue_type_name
+      - project_key

@@ -1,0 +1,27 @@
+{
+  "issues": [
+    {
+      "key": "AB-15",
+      "fields": {
+        "summary": "Ticket 4",
+        "created": "2025-09-30T13:10:01.320+0000",
+        "statusCategory": {
+          "name": "To do"
+        },
+        "labels": ["mvp", "data"],
+        "assignee": {
+          "displayName": "Ben"
+        },
+        "issuetype": {
+          "name": "Sub-task"
+        },
+        "project": {
+          "key": "AB"
+        },
+        "updated": "2025-09-30T13:10:01.320+0000"
+      }
+    }
+  ],
+  "nextPageToken": "",
+  "isLast": true
+}

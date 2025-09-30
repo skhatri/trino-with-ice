@@ -4,8 +4,11 @@ metadata:
 spec:
   store:
     format: "http"
-    location: "https://api.spacexdata.com/v3/launches"
+    location: "${SPACEX_APP_URL}/v3/launches"
     options:
       method: "GET"
       timeout: 30000
       retries: 3
+      noVerifySsl: false
+      # logResponse: true  # Uncomment to log HTTP response body (first 500 characters)
+

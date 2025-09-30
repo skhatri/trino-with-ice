@@ -217,6 +217,11 @@ list-examples: examples
 
 13-rocket-launches: 13
 
+14:
+	@$(MAKE) run-task TASK_PATH=jira/tasks/14-fetch-jira-api-data.yaml
+
+14-fetch-jira-data: 14
+
 dev-db:
 	@$(MAKE) db
 

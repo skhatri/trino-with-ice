@@ -1,0 +1,26 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/rest/api/3/search/jql",
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$.jql"
+      },
+      {
+        "matchesJsonPath": "$.fields"
+      }
+    ],
+    "queryParameters": {
+      "nextPageToken": {
+        "absent": true
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "bodyFileName": "jira1.json"
+  }
+}

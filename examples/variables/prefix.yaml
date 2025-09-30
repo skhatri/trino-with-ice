@@ -6,3 +6,8 @@ spec:
     value: "${EOD_DATE}"
   - name: "JOB_DATA_BUCKET_PREFIX"
     value: "s3a://finance"
+  - name: "SPACEX_APP_URL"
+    value: "http://wiremock:8080"
+    #value: "https://api.spacexdata.com"
+  - name: "JIRA_APP_URL"
+    value: "http://wiremock:8080"
