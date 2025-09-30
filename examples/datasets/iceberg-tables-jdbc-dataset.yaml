@@ -1,0 +1,12 @@
+kind: "Resource"
+metadata:
+  name: "iceberg-tables-jdbc-dataset"
+spec:
+  store:
+    format: "jdbc"
+    location: "jdbc:postgresql://postgres:5432/lakehouse"
+    options:
+      dbtable: "iceberg.iceberg_tables"
+      user: "postgres"
+      password: "password"
+      driver: "org.postgresql.Driver"

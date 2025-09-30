@@ -1,0 +1,22 @@
+kind: Task
+metadata:
+  name: show-iceberg-table-info
+spec:
+  source:
+    - resourceRef: iceberg-tables-parquet
+
+  operations:
+    - transform:
+        select: |
+            catalog_name,
+            table_namespace,
+            table_name,
+            metadata_location,
+            previous_metadata_location,
+            iceberg_type
+
+  sink:
+    - resourceRef: logger
+
+  options:
+    autoIcebergSchema: true

@@ -1,0 +1,22 @@
+kind: Task
+metadata:
+  name: load-iceberg-tables
+spec:
+  source:
+    - resourceRef: iceberg-tables-jdbc-dataset
+
+  operations:
+    - transform:
+        select: |
+            catalog_name,
+            table_namespace,
+            table_name,
+            metadata_location,
+            previous_metadata_location,
+            iceberg_type
+
+  sink:
+    - resourceRef: iceberg-tables-parquet
+
+  options:
+    autoIcebergSchema: true

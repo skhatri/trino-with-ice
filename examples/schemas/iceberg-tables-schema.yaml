@@ -1,0 +1,21 @@
+kind: Schema
+metadata:
+  name: iceberg-tables-schema
+spec:
+  fields:
+    - field: catalog_name
+      type: string
+    - field: table_namespace
+      type: string
+    - field: table_name
+      type: string
+    - field: metadata_location
+      type: string
+    - field: previous_metadata_location
+      type: string
+    - field: iceberg_type
+      type: string
+  keys:
+    - catalog_name
+    - table_namespace
+    - table_name

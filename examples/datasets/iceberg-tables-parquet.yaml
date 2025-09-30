@@ -1,0 +1,19 @@
+kind: "Resource"
+metadata:
+  name: "iceberg-tables-parquet"
+spec:
+  store:
+    format: "parquet"
+    location: "table"
+    partition: "catalog_name"
+    options:
+      table: "iceberg"
+      snapshots: 2
+      dbtable: "iceberg.metadata.info"
+
+  schema:
+    ref: iceberg-tables-schema
+    merge:
+      - iceberg_type
+      - metadata_location
+      - previous_metadata_location
