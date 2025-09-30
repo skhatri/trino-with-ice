@@ -4,24 +4,21 @@
     "urlPath": "/rest/api/3/search/jql",
     "bodyPatterns": [
       {
-        "expression": "$.jql",
-        "equalTo": "project = AB"
+        "matchesJsonPath": {
+          "expression": "$.jql",
+          "equalTo": "project = Unknown"
+        }
       },
       {
         "matchesJsonPath": "$.fields"
       }
-    ],
-    "queryParameters": {
-      "nextPageToken": {
-        "equalTo": "there-is-one-more"
-      }
-    }
+    ]
   },
   "response": {
     "status": 200,
     "headers": {
       "Content-Type": "application/json"
     },
-    "bodyFileName": "jira2.json"
+    "bodyFileName": "jira-empty.json"
   }
 }

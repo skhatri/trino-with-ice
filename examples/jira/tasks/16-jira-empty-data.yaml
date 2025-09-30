@@ -1,0 +1,30 @@
+kind: Task
+type: spark
+metadata:
+  name: fetch-empty-jira-data
+spec:
+  source:
+    - resourceRef: "jira-api-unknown"
+  options:
+    showSample: true
+    printSummary: true
+    failOnValidationError: false
+    debug: true
+
+  operations:
+    - type: transform
+      transform:
+        - select: >
+            key as key,
+            fields.summary as summary,
+            fields.created as created,
+            fields.updated as updated,
+            fields.statusCategory.name as status,
+            fields.labels as labels,
+            fields.assignee.displayName as assignee,
+            fields.issuetype.name as issue_type,
+            fields.project.key as project_key
+        - filter: "key is not null"
+
+  sink:
+    - resourceRef: logger

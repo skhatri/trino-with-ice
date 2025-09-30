@@ -4,7 +4,10 @@
     "urlPath": "/rest/api/3/search/jql",
     "bodyPatterns": [
       {
-        "matchesJsonPath": "$.jql"
+        "matchesJsonPath": {
+          "expression": "$.jql",
+          "equalTo": "project = AB"
+        }
       },
       {
         "matchesJsonPath": "$.fields"

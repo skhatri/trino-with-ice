@@ -1,0 +1,22 @@
+kind: "Resource"
+metadata:
+  name: "jira-api-unknown"
+spec:
+  store:
+    format: "http"
+    location: "${JIRA_APP_URL}/rest/api/3/search/jql"
+    options:
+      method: "POST"
+      timeout: 30000
+      retries: 3
+      extractArray: "issues"
+      noVerifySsl: false
+      logResponse: true
+      headers:
+        Content-Type: "application/json"
+
+      body: |
+        {
+          "jql": "project = Unknown",
+          "fields": ["*all"]
+        }
