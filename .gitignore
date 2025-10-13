@@ -4,4 +4,4 @@ dataset/london_bicycles/
 .DS_Store
 data
 store
-
+**/*test*.yaml

@@ -150,96 +150,96 @@ examples:
 list-examples: examples
 
 1:
-	@$(MAKE) run-task TASK_PATH=txnsharing/tasks/1-prepare-categories.yaml
+	@$(MAKE) run-task TASK_PATH=tasks/txnsharing/tasks/1-prepare-categories.yaml
 
 1-prepare-categories: 1
 
 1-prepare-categories-flink:
-	@$(MAKE) run-task TASK_PATH=txnsharing/tasks/1-prepare-categories-flink.yaml
+	@$(MAKE) run-task TASK_PATH=tasks/txnsharing/tasks/1-prepare-categories-flink.yaml
 
 2:
-	@$(MAKE) run-task TASK_PATH=txnsharing/tasks/2-prepare-merchants.yaml
+	@$(MAKE) run-task TASK_PATH=tasks/txnsharing/tasks/2-prepare-merchants.yaml
 
 2-prepare-merchants: 2
 
 3:
-	@$(MAKE) run-task TASK_PATH=txnsharing/tasks/3-share-raw-txns.yaml
+	@$(MAKE) run-task TASK_PATH=tasks/txnsharing/tasks/3-share-raw-txns.yaml
 
 3-share-transactions: 3
 
 4:
-	@$(MAKE) run-task TASK_PATH=txnsharing/tasks/4-update-categories.yaml
+	@$(MAKE) run-task TASK_PATH=tasks/txnsharing/tasks/4-update-categories.yaml
 
 4-update-categories: 4
 
 5:
-	@$(MAKE) run-task TASK_PATH=txnsharing/tasks/5-update-merchants.yaml
+	@$(MAKE) run-task TASK_PATH=tasks/txnsharing/tasks/5-update-merchants.yaml
 
 5-update-merchants: 5
 
 6:
-	@$(MAKE) run-task TASK_PATH=txnpipe/tasks/load-raw-txn-data.yaml
+	@$(MAKE) run-task TASK_PATH=tasks/txnpipe/tasks/load-raw-txn-data.yaml
 
 6-save-transactions: 6
 
 7:
-	@$(MAKE) run-task TASK_PATH=txnpipe/tasks/load-balance-data.yaml
+	@$(MAKE) run-task TASK_PATH=tasks/txnpipe/tasks/load-balance-data.yaml
 
 7-save-balances: 7
 
 8:
-	@$(MAKE) run-task TASK_PATH=txnpipe/tasks/create-monthly-balance-snapshot.yaml
+	@$(MAKE) run-task TASK_PATH=tasks/txnpipe/tasks/create-monthly-balance-snapshot.yaml
 
 8-monthly-balance: 8
 
 10:
-	@$(MAKE) run-task TASK_PATH=txnpipe/tasks/show-txns.yaml
+	@$(MAKE) run-task TASK_PATH=tasks/txnpipe/tasks/show-txns.yaml
 
 10-print-transactions: 10
 
 11:
-	@$(MAKE) run-task TASK_PATH=bicycles/tasks/1-london-bicycles-data.yaml
+	@$(MAKE) run-task TASK_PATH=tasks/bicycles/tasks/1-london-bicycles-data.yaml
 
 11-bicycles-data: 11
 
 0:
-	@$(MAKE) run-task TASK_PATH=jira/tasks/1-prepare-jira-data.yaml
+	@$(MAKE) run-task TASK_PATH=tasks/jira/tasks/1-prepare-jira-data.yaml
 
 1-jira-data: 0
 
 12:
-	@$(MAKE) run-task TASK_PATH=spacex/tasks/12-rocket-launches.yaml
+	@$(MAKE) run-task TASK_PATH=tasks/spacex/tasks/12-rocket-launches.yaml
 
 12-rocket-launches: 12
 
 13:
-	@$(MAKE) run-task TASK_PATH=spacex/tasks/13-rocket-launches-transform.yaml
+	@$(MAKE) run-task TASK_PATH=tasks/spacex/tasks/13-rocket-launches-transform.yaml
 
 13-rocket-launches: 13
 
 14:
-	@$(MAKE) run-task TASK_PATH=jira/tasks/14-fetch-jira-api-data.yaml
+	@$(MAKE) run-task TASK_PATH=tasks/jira/tasks/14-fetch-jira-api-data.yaml
 
 14-fetch-jira-data: 14
 
 15:
-	@$(MAKE) run-task TASK_PATH=jira/tasks/15-show-jira-parquet.yaml
+	@$(MAKE) run-task TASK_PATH=tasks/jira/tasks/15-show-jira-parquet.yaml
 
 15-show-jira-parquet: 15
 
 16:
-	@$(MAKE) run-task TASK_PATH=jira/tasks/16-jira-empty-data.yaml
+	@$(MAKE) run-task TASK_PATH=tasks/jira/tasks/16-jira-empty-data.yaml
 
 16-jira-empty-data: 16
 
 
 17:
-	@$(MAKE) run-task TASK_PATH=jdbc/tasks/17-load-iceberg-tables.yaml
+	@$(MAKE) run-task TASK_PATH=tasks/jdbc/tasks/17-load-iceberg-tables.yaml
 
 17-load-iceberg-tables: 17
 
 18:
-	@$(MAKE) run-task TASK_PATH=jdbc/tasks/18-show-iceberg-table-info.yaml
+	@$(MAKE) run-task TASK_PATH=tasks/jdbc/tasks/18-show-iceberg-table-info.yaml
 
 18-show-iceberg-table-info: 18
 
