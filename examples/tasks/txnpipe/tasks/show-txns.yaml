@@ -1,7 +1,7 @@
 kind: Task
 type: spark
 metadata:
-  name: load-raw-txn-data
+  name: show-raw-txn-data
 spec:
   source:
     - resourceRef: transactions-lakehouse-dataset
