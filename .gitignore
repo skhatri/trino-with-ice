@@ -1,6 +1,8 @@
 .idea
 dataset/london_bicycles/
 
+**/*test*.yaml
 .DS_Store
 data
 store
+
