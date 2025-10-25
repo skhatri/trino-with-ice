@@ -1,0 +1,16 @@
+kind: Task
+type: spark
+metadata:
+  name: raw-account-activity
+spec:
+  source:
+    - resourceRef: activity-json-dataset
+      name: activityjson
+
+  operations: []
+
+  sink:
+    - resourceRef: logger
+
+
+

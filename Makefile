@@ -243,6 +243,10 @@ list-examples: examples
 
 18-show-iceberg-table-info: 18
 
+19:
+	@$(MAKE) run-task TASK_PATH=tasks/txnpipe/tasks/raw-account-activity.yaml
+
+19-show-activity-list: 19
 
 
 dev-db:
