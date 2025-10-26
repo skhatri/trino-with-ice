@@ -3,7 +3,8 @@ metadata:
   name: "activity-json-dataset"
 spec:
   store:
-    format: "json"
-    location: "${JOB_DATA_BUCKET_PREFIX}/account-activity"
+    format: "jsondoc"
+    location: "${JOB_DATA_BUCKET_PREFIX}/account-activity/account=all/1.json"
     partition: "account=all"
-
+    options:
+      extractArray: data
