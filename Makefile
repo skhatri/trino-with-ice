@@ -1,5 +1,9 @@
 .PHONY: help all db query store stream app up down logs clean clean-all setup-data pyiceberg examples list-examples run-task build
 
+COMPOSE ?= docker compose
+TASK_SERVICE ?= datapipe
+TASK_RUN_ARGS ?=
+
 TASK_PATH ?= $(shell grep '^TASK_PATH=' .env 2>/dev/null | cut -d'=' -f2)
 
 YELLOW=\033[33m
@@ -129,7 +133,7 @@ run-task:
 		exit 1; \
 	fi
 	@echo "$(GREEN)Running task: $(CLEAN_TASK_PATH)$(NC)"
-	TASK_PATH="$(CLEAN_TASK_PATH)" docker-compose run --rm datapipe
+	TASK_PATH="$(CLEAN_TASK_PATH)" $(COMPOSE) run --rm $(TASK_RUN_ARGS) $(TASK_SERVICE)
 
 
 examples:
@@ -317,3 +321,11 @@ restart:
 
 restart-%:
 	docker-compose --profile $* restart
+
+.PHONY: smoke smoke-test
+smoke: ## Verify target 4 three times in isolated Compose state (IMAGE required)
+	@test -n "$(IMAGE)" || { echo "Usage: make smoke IMAGE=<locally-built-image>"; exit 1; }
+	python3 smoke/compose_smoke.py --image "$(IMAGE)"
+
+smoke-test: ## Test the smoke harness without Docker
+	python3 -m unittest discover -s smoke -p "test_*.py" -v
