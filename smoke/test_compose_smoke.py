@@ -129,8 +129,36 @@ class ProcessTests(unittest.TestCase):
                 self.h.execute()
         self.assertFalse(any(c.args[0][0] == 'make' for c in run.call_args_list))
 
+    def test_three_runs_start_once_without_shutdown_or_restart(self):
+        date = datetime.date.today().isoformat()
+        rows = [[*pair, date] for pair in PAIRS]
+        columns = [dict(name=n, type=t) for n, t in SCHEMA]
+        self.h.report['resolved_images'] = ['candidate:123']
+        with patch.object(self.h, 'run', return_value='[]') as run, patch.object(self.h, 'sql', return_value=(rows, columns)):
+            self.h.execute()
+        commands = [call.args[0] for call in run.call_args_list]
+        self.assertEqual(1, sum('up' in command for command in commands))
+        self.assertEqual(3, sum(command[0] == 'make' for command in commands))
+        self.assertFalse(any('down' in command or 'restart' in command or 'stop' in command for command in commands))
+        self.assertTrue(all(cycle['passed'] for cycle in self.h.report['cycles']))
+
+    def test_default_preserves_services_after_failure(self):
+        self.h.output = Path(self.directory.name) / 'keep-running-report'
+        def fail():
+            self.h.started = True
+            raise RuntimeError('output mismatch')
+        with patch.object(self.h, 'prepare'), patch.object(self.h, 'execute', side_effect=fail), patch.object(self.h, 'run', return_value='') as run:
+            self.assertEqual(1, self.h.main())
+        commands = [call.args[0] for call in run.call_args_list]
+        self.assertFalse(any('down' in command or 'rm' in command or 'restart' in command for command in commands))
+        report = json.loads((self.h.output / 'report.json').read_text())
+        self.assertFalse(report['passed'])
+        self.assertFalse(report['cleanup_requested'])
+        self.assertIn('cleanup_command', report)
+
     def test_failure_report_and_cleanup_propagate_nonzero(self):
         self.h.output = Path(self.directory.name) / 'report'
+        self.h.cleanup = True
         def fail():
             self.h.started = True
             raise RuntimeError('output mismatch')

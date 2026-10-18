@@ -63,7 +63,7 @@ def assert_output(rows, columns, baseline=None):
 
 
 class Harness:
-    def __init__(self, root, output, image, timeout=600, compose='docker compose'):
+    def __init__(self, root, output, image, timeout=600, compose='docker compose', cleanup=False):
         self.root, self.output, self.image, self.timeout = Path(root), Path(output), image, timeout
         self.project = 'datapipe-smoke-' + uuid.uuid4().hex[:12]
         self.task_container = self.project + '-task'
@@ -71,6 +71,9 @@ class Harness:
         self.compose = self.compose_base + ['-p', self.project, '-f', str(self.output / 'compose.json')]
         self.report = {'project': self.project, 'candidate_image': image, 'cycles': [], 'commands': [], 'passed': False}
         self.started = False
+        self.cleanup = cleanup
+        self.report['cleanup_requested'] = cleanup
+        self.report['cleanup_command'] = shlex.join(self.compose + ['down', '--volumes', '--remove-orphans'])
 
     def run(self, args, timeout=None):
         entry = {'argv': args}
@@ -176,29 +179,27 @@ class Harness:
         self.report['resolved_images'] = self.run(self.compose + ['config', '--images'], timeout=30).splitlines()
 
     def execute(self):
+        # Start once, then verify repeated task outcomes against the same environment.
+        self.started = True
+        self.run(self.compose + ['up', '-d', '--wait', '--wait-timeout', '240', 'iceberg-rest', 'coordinator'], timeout=300)
+        deadline = time.monotonic() + min(self.timeout, 180)
+        while True:
+            try:
+                self.sql('SELECT 1')
+                self.sql("CREATE SCHEMA IF NOT EXISTS iceberg.finance WITH (location='s3://warehouse/finance')")
+                break
+            except RuntimeError:
+                if time.monotonic() >= deadline:
+                    raise
+                time.sleep(2)
         baseline = None
         for cycle in range(1, 4):
             record = {'cycle': cycle, 'state': 'clean' if cycle == 1 else 'reuse', 'passed': False}
             self.report['cycles'].append(record)
-            self.started = True
-            # --wait validates health and successful one-shot dependencies; excludes the task itself.
-            self.run(self.compose + ['up', '-d', '--wait', '--wait-timeout', '240', 'iceberg-rest', 'coordinator'], timeout=300)
-            deadline = time.monotonic() + min(self.timeout, 180)
-            while True:
-                try:
-                    self.sql('SELECT 1')
-                    self.sql("CREATE SCHEMA IF NOT EXISTS iceberg.finance WITH (location='s3://warehouse/finance')")
-                    break
-                except RuntimeError:
-                    if time.monotonic() >= deadline:
-                        raise
-                    time.sleep(2)
             self.run(['make', '4', 'COMPOSE=' + shlex.join(self.compose), 'TASK_SERVICE=datapipe', 'TASK_RUN_ARGS=--no-deps --name ' + self.task_container])
             rows, columns = self.sql('SELECT mcc, category, process_date FROM iceberg.finance.category ORDER BY mcc')
             baseline = assert_output(rows, columns, baseline)
             record.update(rows=rows, columns=columns, passed=True)
-            self.run(self.compose + ['logs', '--no-color'], timeout=30)
-            self.run(self.compose + ['down', '--remove-orphans', '--timeout', '20'], timeout=90)
         self.report['dependency_images'] = json.loads(self.run(['docker', 'image', 'inspect'] + self.report['resolved_images'], timeout=30))
 
     def main(self):
@@ -211,6 +212,11 @@ class Harness:
             self.report['error'] = str(exc)
         finally:
             if self.started:
+                try:
+                    self.run(self.compose + ['logs', '--no-color'], timeout=30)
+                except Exception as exc:
+                    self.report['log_error'] = str(exc)
+            if self.started and self.cleanup:
                 # A killed Docker client can leave its one-off container running.
                 try:
                     containers = self.run(['docker', 'container', 'ls', '-a', '--filter', 'name=^/' + self.task_container + '$', '--format', '{{.Names}}'], timeout=30).splitlines()
@@ -234,6 +240,7 @@ def main():
     parser.add_argument('--image', required=True, help='Locally built candidate image; recorded with its image ID')
     parser.add_argument('--output', default=str(Path.cwd() / ('smoke-results-' + uuid.uuid4().hex[:8])))
     parser.add_argument('--timeout', type=int, default=600, help='Maximum task duration in seconds')
+    parser.add_argument('--cleanup', action='store_true', help='Explicitly remove this smoke project and its volumes after verification; default leaves services running')
     parser.add_argument('--compose', default=os.environ.get('COMPOSE', 'docker compose'))
     args = parser.parse_args()
     if args.timeout <= 0:
@@ -242,7 +249,7 @@ def main():
         raise RuntimeError('Smoke check cancelled by signal %d' % signum)
     signal.signal(signal.SIGTERM, cancelled)
     signal.signal(signal.SIGINT, cancelled)
-    harness = Harness(Path(__file__).resolve().parent.parent, Path(args.output).resolve(), args.image, args.timeout, args.compose)
+    harness = Harness(Path(__file__).resolve().parent.parent, Path(args.output).resolve(), args.image, args.timeout, args.compose, args.cleanup)
     if harness.output.exists():
         parser.error('--output already exists; choose a new evidence directory')
     result = harness.main()

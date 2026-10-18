@@ -83,8 +83,9 @@ date and must not append duplicates. The three expected pairs are `4111` →
 `Transportation:Ride Sharing`, `5812` → `Food and Drinks:Restaurants`, and `5813`
 → `Food and Drinks:Fast Food`.
 
-The first cycle uses fresh project-scoped volumes; cycles two and three restart
-containers while retaining those volumes. The harness derives its configuration
+The environment starts once with fresh project-scoped volumes. All three task
+runs use the same running services and retained state; no restart is performed.
+The harness derives its configuration
 from `docker-compose.yaml`, selects only required services, removes fixed names
 and published ports, replaces persistent data mounts with owned volumes, and
 mounts example/configuration inputs read-only. It copies PostgreSQL certificates
@@ -93,10 +94,11 @@ HTTP within the private Compose network without password authentication, enables
 native S3 access to MinIO, and loads only the Iceberg catalog. No host ports are
 published. These overrides belong only to the smoke environment.
 
-Cleanup always targets the unique `datapipe-smoke-*` project and removes its owned
-volumes, including after failures. Developer data directories and other Compose
-projects are untouched. Avoid interrupting cleanup; if interrupted, use the exact
-project/file recorded in the report:
+Services remain running after verification, including after a task failure, for
+inspection. There is no Docker Desktop shutdown/restart handling. Add `--cleanup`
+to the Python invocation only when you want the smoke project and its volumes
+removed after the check. Otherwise clean up explicitly with the exact command
+recorded as `cleanup_command` in the report:
 
 ```sh
 docker compose -p datapipe-smoke-<recorded-id> -f /path/to/evidence/compose.json down -v
@@ -105,7 +107,8 @@ docker compose -p datapipe-smoke-<recorded-id> -f /path/to/evidence/compose.json
 `run-task` accepts `COMPOSE` (default `docker compose`) and `TASK_SERVICE`
 (default `datapipe`) so the same numbered target runs against the isolated file.
 The smoke check exits nonzero for command, readiness, timeout, task, output or
-cleanup failures. Unit tests run without Docker and cover isolation, failure
+explicitly requested cleanup failures. Unit tests run without Docker and cover
+isolation, failure
 propagation, query errors/pagination, exact rows, duplicate rows and schema/date
 regressions. A unit-test pass alone is not evidence of three successful live
 cycles; inspect `report.json` for `passed: true` and three passing cycles.
