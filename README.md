@@ -5,6 +5,14 @@ DataPipe Docker Compose setup with Trino, Iceberg, and MinIO for streaming data 
 ## Quick Start
 
 ### 1. Setup Environment
+
+The former public `minio/minio` and `minio/mc` image repositories no longer allow
+pulls. Make targets build the pinned server/client from checksum-verified upstream
+source when the local images are missing. This first build needs Go 1.24.2+,
+Python 3.12+, network access to GitHub/Go modules, and the `busybox:1.36` base image.
+See [the source-build instructions](containers/minio-source/README.md).
+For direct Compose commands, first run `make minio-images`.
+
 ```bash
 make setup-data
 ```
@@ -54,3 +62,61 @@ Stops all services and removes all persistent data (PostgreSQL, MinIO, Kafka, So
 ```bash
 make help
 ```
+
+## Repeatable Compose smoke check
+
+Build the candidate Spark image from the DataPipe checkout first, then run:
+
+```sh
+make smoke-test
+make smoke IMAGE=datapipe-spark:t1-candidate
+# Explicit evidence directory and command timeout:
+python3 smoke/compose_smoke.py --image datapipe-spark:t1-candidate \
+  --output /tmp/datapipe-smoke-evidence --timeout 600
+```
+
+Requires Python 3.9+, GNU make, Docker Compose v2 and a responsive Docker daemon.
+The candidate image must already exist locally; its image ID, dependency image IDs,
+Git revision, commands and exit codes are retained in `report.json`. The output
+folder must be new. Each command has a separate log, including failures/timeouts.
+Evidence may contain demo credentials; keep the report directory local.
+
+The selected existing target is `make 4` (`4-update-categories`), whose inline CSV
+avoids external APIs and host seed data. Only PostgreSQL/seed, MinIO/init, Iceberg
+REST and Trino are started before the one-shot DataPipe task. The finance schema
+is created through Trino. Each of three cycles asserts exactly three persisted
+`mcc/category` tuples, string/string/date column types, and a single process date.
+The initial date must be today; subsequent upserts must preserve that original
+date and must not append duplicates. The three expected pairs are `4111` →
+`Transportation:Ride Sharing`, `5812` → `Food and Drinks:Restaurants`, and `5813`
+→ `Food and Drinks:Fast Food`.
+
+The environment starts once with fresh project-scoped volumes. All three task
+runs use the same running services and retained state; no restart is performed.
+The harness derives its configuration
+from `docker-compose.yaml`, selects only required services, removes fixed names
+and published ports, replaces persistent data mounts with owned volumes, and
+mounts example/configuration inputs read-only. It copies PostgreSQL certificates
+before changing container-side key permissions. Its isolated Trino config uses
+HTTP within the private Compose network without password authentication, enables
+native S3 access to MinIO, and loads only the Iceberg catalog. No host ports are
+published. These overrides belong only to the smoke environment.
+
+Services remain running after verification, including after a task failure, for
+inspection. There is no Docker Desktop shutdown/restart handling. Add `--cleanup`
+to the Python invocation only when you want the smoke project and its volumes
+removed after the check. Otherwise clean up explicitly with the exact command
+recorded as `cleanup_command` in the report:
+
+```sh
+docker compose -p datapipe-smoke-<recorded-id> -f /path/to/evidence/compose.json down -v
+```
+
+`run-task` accepts `COMPOSE` (default `docker compose`) and `TASK_SERVICE`
+(default `datapipe`) so the same numbered target runs against the isolated file.
+The smoke check exits nonzero for command, readiness, timeout, task, output or
+explicitly requested cleanup failures. Unit tests run without Docker and cover
+isolation, failure
+propagation, query errors/pagination, exact rows, duplicate rows and schema/date
+regressions. A unit-test pass alone is not evidence of three successful live
+cycles; inspect `report.json` for `passed: true` and three passing cycles.
