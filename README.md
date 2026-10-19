@@ -5,6 +5,14 @@ DataPipe Docker Compose setup with Trino, Iceberg, and MinIO for streaming data 
 ## Quick Start
 
 ### 1. Setup Environment
+
+The former public `minio/minio` and `minio/mc` image repositories no longer allow
+pulls. Make targets build the pinned server/client from checksum-verified upstream
+source when the local images are missing. This first build needs Go 1.24.2+,
+Python 3.12+, network access to GitHub/Go modules, and the `busybox:1.36` base image.
+See [the source-build instructions](containers/minio-source/README.md).
+For direct Compose commands, first run `make minio-images`.
+
 ```bash
 make setup-data
 ```

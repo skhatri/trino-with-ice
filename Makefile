@@ -35,7 +35,7 @@ help:
 	@echo "  make run-task TASK_PATH=bicycles/flow.yaml # Run single task"
 	@echo "  make examples                              # List all example files"
 
-all: local-perm
+all: local-perm minio-images
 	@echo "$(BLUE)Starting all services...$(NC)"
 	docker-compose --profile all up -d
 
@@ -45,11 +45,11 @@ db: local-perm
 
 local-perm:
 	@chmod 600 containers/postgres/certs/server.key 2>/dev/null || true
-query:
+query: minio-images
 	@echo "$(BLUE)Starting query services...$(NC)"
 	docker-compose --profile query up -d
 
-store:
+store: minio-images
 	@echo "$(BLUE)Starting storage services...$(NC)"
 	docker-compose --profile store up -d
 
@@ -121,7 +121,7 @@ setup-data: store db pyiceberg
 	@echo "$(BLUE)Setting up sample data...$(NC)"
 	./setup-data.sh
 
-run-task:
+run-task: minio-images
 	@if [ -z "$(TASK_PATH)" ]; then \
 		echo "$(RED)Error: TASK_PATH is required$(NC)"; \
 		echo "Usage: make run-task TASK_PATH=path/to/task.yaml"; \
@@ -329,3 +329,10 @@ smoke: ## Verify target 4 three times in isolated Compose state (IMAGE required)
 
 smoke-test: ## Test the smoke harness without Docker
 	python3 -m unittest discover -s smoke -p "test_*.py" -v
+
+.PHONY: minio-images
+minio-images: ## Build pinned upstream MinIO server/client if local images are missing
+	@if ! docker image inspect datapipe-minio:RELEASE.2025-09-07T16-13-09Z >/dev/null 2>&1 || \
+	    ! docker image inspect datapipe-mc:RELEASE.2025-08-13T08-35-41Z >/dev/null 2>&1; then \
+		python3 containers/minio-source/build.py --images; \
+	fi
